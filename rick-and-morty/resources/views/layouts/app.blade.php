@@ -4,9 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Teste Desenvolvedor Vitafor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="icon" type="image/x-icon" href="{{ asset(path: 'favicon.svg') }}">
+    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
 <body class="bg-light">
 
@@ -15,7 +14,7 @@
             <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('home') }}">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Rick_and_Morty.svg/800px-Rick_and_Morty.svg.png"
                 alt="Rick and Morty" 
-                width="150" height="150" 
+                width="200" height="50" 
                 >
             </a>
 
@@ -35,22 +34,18 @@
 
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     @auth
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                {{ Auth::user()->name }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                       Sair
-                                    </a>
-                                </li>
-                            </ul>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                @csrf
-                            </form>
-                        </li>
+                    <li class="nav-item d-flex align-items-center text-white me-2">
+                        {{ Auth::user()->name }}
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ route('logout') }}"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        Sair
+                        </a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                            @csrf
+                        </form>
+                    </li>
                     @else
                         <li class="nav-item"><a class="nav-link text-white" href="{{ route('login') }}">Login</a></li>
                         <li class="nav-item"><a class="nav-link text-white" href="{{ route('register') }}">Registrar</a></li>

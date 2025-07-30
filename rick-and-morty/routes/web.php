@@ -2,9 +2,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CharacterController;
 
+
 Route::get('/home', function () {
     return redirect()->route('home');
 });
+
+Route::get('/characters/ajax', [CharacterController::class, 'loadCharactersAjax'])->name('characters.ajax');
 
 Route::get('/', [CharacterController::class, 'index'])->name('home');
 Route::get('/characters/{id}', [CharacterController::class, 'show'])->name('characters.show');
