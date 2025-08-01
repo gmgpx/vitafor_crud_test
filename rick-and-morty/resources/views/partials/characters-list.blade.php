@@ -25,26 +25,29 @@
         <div class="col-md-4 mb-4">
             <div class="card h-100">
                 <a href="{{ route('characters.show', $character['id']) }}">
-                    <img src="{{ $character['image'] }}" class="card-img-top character-img" alt="{{ $character['name'] }}">
+                    <img loading="lazy" src="{{ $character['image'] }}" class="card-img-top character-img" alt="{{ $character['name'] }}">
                 </a>
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">{{ $character['name'] }}</h5>
-                    <p class="card-text"><strong>Espécie:</strong> {{ $speciesLabels[$character['species']] ?? $character['species'] }}</p>
-                    <p class="card-text"><strong>Status:</strong> {{ $statusLabels[strtolower($character['status'])] ?? $character['status'] }}</p>
-                    <p class="card-text"><strong>Gênero:</strong> {{ $genderLabels[strtolower($character['gender'])] ?? $character['gender'] }}</p>
+                    <p class="card-text">
+                        <i class="bi bi-box me-1"></i>
+                        <strong>Espécie:</strong> {{ $speciesLabels[$character['species']] ?? $character['species'] }}
+                    </p>
+                    <p class="card-text">
+                        <i class="bi bi-heart-pulse me-1"></i>
+                        <strong>Status:</strong>
+                        {{ $statusLabels[strtolower($character['status'])] ?? $character['status'] }}
+                    </p>
+                    <p class="card-text">
+                        <i class="bi bi-gender-ambiguous me-1"></i>
+                        <strong>Gênero:</strong>
+                        {{ $genderLabels[strtolower($character['gender'])] ?? $character['gender'] }}
+                    </p>
 
                     <div class="mt-auto">
-                        @auth
-                            <form action="{{ route('characters.store') }}" method="POST" class="mb-2">
-                                @csrf
-                                <input type="hidden" name="name" value="{{ $character['name'] }}">
-                                <input type="hidden" name="species" value="{{ $character['species'] }}">
-                                <input type="hidden" name="image" value="{{ $character['image'] }}">
-                                <input type="hidden" name="url" value="{{ $character['url'] }}">
-                                <button type="submit" class="btn btn-success w-100">Salvar</button>
-                            </form>
-                        @endauth
-                        <a href="{{ route('characters.show', $character['id']) }}" class="btn btn-primary w-100">Detalhes</a>
+                        <a href="{{ route('characters.show', $character['id']) }}" class="btn btn-primary w-100">
+                            <i class="bi bi-info-lg me-1"></i>Detalhes
+                        </a>
                     </div>
                 </div>
             </div>
