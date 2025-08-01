@@ -11,9 +11,9 @@ Route::get('/characters/ajax', [CharacterController::class, 'loadCharactersAjax'
 
 Route::get('/', [CharacterController::class, 'index'])->name('home');
 Route::get('/characters/{id}', [CharacterController::class, 'show'])->name('characters.show');
+Route::get('/characters', action: [CharacterController::class, 'myCharacters'])->name('characters.index');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/characters', [CharacterController::class, 'myCharacters'])->name('characters.index');
     Route::post('/characters', [CharacterController::class, 'store'])->name('characters.store');
     Route::delete('/characters/{id}', [CharacterController::class, 'destroy'])->name('characters.destroy');
     Route::get('/characters/{id}/edit', [CharacterController::class, 'edit'])->name('characters.edit');

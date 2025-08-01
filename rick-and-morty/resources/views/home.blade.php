@@ -3,12 +3,10 @@
 @section('content')
     <h1 class="mb-4 text-center">Galeria de Personagens</h1>
 
-    {{-- Mensagem de erro --}}
     @if (!empty($error))
         <div class="alert alert-warning text-center">{{ $error }}</div>
     @endif
 
-    {{-- Filtros --}}
     <form method="GET" action="{{ route('home') }}" class="row g-3 mb-4" id="filter-form">
         <div class="col-md-3">
             <input type="text" name="name" class="form-control" placeholder="Nome do personagem" value="{{ $filters['name'] ?? '' }}">
@@ -59,8 +57,12 @@
             </select>
         </div>
         <div class="col-12 text-end">
-            <button type="submit" class="btn btn-primary">Filtrar</button>
-            <button type="button" id="btn-clear" class="btn btn-secondary">Limpar</button>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search me-1"></i> Filtrar
+            </button>
+            <button type="button" id="btn-clear" class="btn btn-secondary">
+                <i class="bi bi-x-lg me-1"></i> Limpar
+            </button>
         </div>
 
     </form>
