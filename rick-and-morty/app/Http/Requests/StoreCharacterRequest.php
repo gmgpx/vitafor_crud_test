@@ -2,7 +2,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-//C:\Users\Cliente\Desktop\gustavo\vitafor\vitafor_crud_test\rick-and-morty\app\Http\Requests\StoreCharacterRequest.php
 
 class StoreCharacterRequest extends FormRequest
 {

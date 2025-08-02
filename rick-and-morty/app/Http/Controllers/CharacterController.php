@@ -2,86 +2,75 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
+use App\Http\Requests\StoreCharacterRequest;
 use App\Models\Character;
+use App\Services\ApiService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class CharacterController extends Controller
 {
-    public function __construct()
+    protected $apiService;
+
+    public function __construct(ApiService $apiService)
     {
         $this->middleware('auth')->only(['store', 'destroy', 'edit', 'update']);
+        $this->apiService = $apiService;
     }
 
+    // Página inicial com listagem da API (home)
     public function index(Request $request)
     {
         $filters = $request->only(['name', 'status', 'species', 'gender']);
         $page = $request->get('page', 1);
-
         $queryParams = array_merge($filters, ['page' => $page]);
 
-        $response = Http::get('https://rickandmortyapi.com/api/character', $queryParams);
+        $data = $this->apiService->fetchCharacters($queryParams);
 
-        if ($response->failed()) {
+        if (!$data) {
             return view('home', [
                 'characters' => [],
                 'info' => ['pages' => 0],
                 'page' => 1,
                 'filters' => $filters,
-                'error' => 'Nenhum personagem encontrado com esses filtros.'
+                'error' => 'Nenhum personagem encontrado',
             ]);
         }
-
-        $data = $response->json();
 
         return view('home', [
             'characters' => $data['results'],
             'info' => $data['info'],
             'page' => $page,
-            'filters' => $filters
+            'filters' => $filters,
         ]);
     }
 
+    // Carregar personagens via Ajax (filtragem paginada)
     public function loadCharactersAjax(Request $request)
     {
         $filters = $request->only(['name', 'status', 'species', 'gender']);
         $page = $request->get('page', 1);
-
         $queryParams = array_merge($filters, ['page' => $page]);
 
-        $response = Http::get('https://rickandmortyapi.com/api/character', $queryParams);
-
-        if ($response->failed()) {
-            return response()->json([
-                'html' => view('partials.characters-list', [
-                    'characters' => [],
-                    'info' => ['pages' => 0],
-                    'page' => 1,
-                    'filters' => $filters,
-                    'error' => 'Nenhum personagem encontrado com esses filtros.',
-                ])->render()
-            ]);
-        }
-
-        $data = $response->json();
+        $data = $this->apiService->fetchCharacters($queryParams);
 
         return response()->json([
             'html' => view('partials.characters-list', [
-                'characters' => $data['results'],
-                'info' => $data['info'],
+                'characters' => $data['results'] ?? [],
+                'info' => $data['info'] ?? ['pages' => 0],
                 'page' => $page,
                 'filters' => $filters,
-                'error' => null,
+                'error' => $data ? null : 'Nenhum personagem encontrado com esses filtros.',
             ])->render()
         ]);
     }
 
+    // Personagens salvos no banco do usuário logado
     public function myCharacters()
     {
         $characters = Character::where('user_id', Auth::id())->get();
+
         $ownedNames = $characters->pluck('name')
             ->map(fn($name) => Str::lower(trim($name)))
             ->toArray();
@@ -109,7 +98,6 @@ class CharacterController extends Controller
                 'Squanchy' => 'https://rickandmortyapi.com/api/character/avatar/331.jpeg',
                 'Birdperson' => 'https://rickandmortyapi.com/api/character/avatar/47.jpeg',
             ],
-
             'Vindicators' => [
                 'Supernova' => 'https://rickandmortyapi.com/api/character/avatar/340.jpeg',
                 'Calypso' => 'https://rickandmortyapi.com/api/character/avatar/60.jpeg',
@@ -139,30 +127,21 @@ class CharacterController extends Controller
                 'completed' => $completed,
             ] : null;
         })->filter();
+
         $allGroupsCompleted = $badges->every(fn($badge) => $badge['completed']);
 
         return view('characters', compact('characters', 'badges', 'allGroupsCompleted'));
     }
 
-    public function store(Request $request)
+    // Armazena novo personagem (ou atualiza se já existir para o usuário)
+    public function store(StoreCharacterRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'species' => 'required|string|max:255',
-            'image' => 'required|url',
-            'url' => 'required|url',
-        ]);
-
         $exists = Character::where('user_id', Auth::id())
             ->where('name', $request->name)
             ->first();
 
         if ($exists) {
-            $exists->species = $request->species;
-            $exists->image = $request->image;
-            $exists->url = $request->url;
-            $exists->updated_at = now();
-            $exists->save();
+            $exists->update($request->only(['species', 'image', 'url']));
             return redirect()->route('characters.index')->with('success', 'Personagem atualizado!');
         }
 
@@ -177,6 +156,7 @@ class CharacterController extends Controller
         return redirect()->route('characters.index')->with('success', 'Personagem salvo!');
     }
 
+    // Mostra detalhes do personagem, da API ou DB
     public function show($id)
     {
         $character = null;
@@ -186,64 +166,46 @@ class CharacterController extends Controller
             $characterModel = Character::where('id', $id)->where('user_id', Auth::id())->first();
             if ($characterModel) {
                 $fromDb = true;
+                $apiData = $this->apiService->fetchCharacterById($id);
 
-                $response = Http::get("https://rickandmortyapi.com/api/character/{$id}");
-                $apiData = $response->json();
-
-                $character = [
-                    'id' => $characterModel->id,
-                    'name' => $characterModel->name,
-                    'species' => $characterModel->species,
-                    'image' => $characterModel->image,
-                    'url' => $characterModel->url,
-                    'created_at' => $characterModel->created_at,
-                    'updated_at' => $characterModel->updated_at,
+                $character = array_merge($characterModel->toArray(), [
                     'status' => $apiData['status'] ?? 'unknown',
                     'gender' => $apiData['gender'] ?? 'unknown',
                     'origin' => $apiData['origin'] ?? null,
                     'location' => $apiData['location'] ?? null,
-                ];
+                ]);
             }
         }
 
         if (!$character) {
-            $response = Http::get("https://rickandmortyapi.com/api/character/{$id}");
-            $character = $response->json();
+            $character = $this->apiService->fetchCharacterById($id);
             $fromDb = false;
         }
 
-        return view('details', ['character' => $character, 'fromDb' => $fromDb]);
+        return view('details', compact('character', 'fromDb'));
     }
 
+    // Exclui personagem salvo
     public function destroy($id)
     {
         $character = Character::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         $character->delete();
+
         return redirect()->route('characters.index')->with('success', 'Personagem excluído!');
     }
 
+    // Tela de edição do personagem salvo
     public function edit($id)
     {
         $character = Character::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
         return view('characters.edit', compact('character'));
     }
 
-    public function update(Request $request, $id)
+    // Atualiza personagem salvo
+    public function update(StoreCharacterRequest $request, $id)
     {
         $character = Character::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'species' => 'required|string|max:255',
-            'image' => 'required|url',
-            'url' => 'required|url',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->route('characters.edit', $id)
-                ->withErrors($validator)
-                ->withInput();
-        }
 
         $character->update($request->only(['name', 'species', 'image', 'url']));
 
