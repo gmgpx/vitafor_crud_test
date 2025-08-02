@@ -3,7 +3,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-// C:\Users\Cliente\Desktop\gustavo\vitafor\vitafor_crud_test\rick-and-morty\app\Services\ApiService.php
+
 class ApiService
 {
     public function fetchCharacters(array $queryParams)
