@@ -40,8 +40,12 @@
                     <p><i class="bi bi-link-45deg me-2"></i><strong>URL:</strong>
                         <a href="{{ $character['url'] }}" target="_blank">{{ $character['url'] }}</a>
                     </p>
-                    <p><i class="bi bi-calendar-check me-2"></i><strong>Criado em:</strong> {{ $character['created_at'] }}</p>
-                    <p><i class="bi bi-calendar-event me-2"></i><strong>Atualizado em:</strong> {{ $character['updated_at'] }}</p>
+                    <p><i class="bi bi-calendar-check me-2"></i><strong>Criado em:</strong>
+                        {{ \Carbon\Carbon::parse($character['created_at'])->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }}
+                    </p>
+                    <p><i class="bi bi-calendar-event me-2"></i><strong>Atualizado em:</strong>
+                        {{ \Carbon\Carbon::parse($character['updated_at'])->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }}
+                    </p>
                 @else
                     <p><i class="bi bi-heart-pulse me-2"></i><strong>Status:</strong>
                         {{ $statusLabels[strtolower($character['status'])] ?? $character['status'] }}
