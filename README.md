@@ -54,7 +54,7 @@ Para rodar localmente (fora do Docker):
 git clone https://github.com/gmgpx/vitafor_crud_test.git
 
 # Entre no projeto
-cd rick-and-morty
+cd vitafor_crud_test/rick-and-morty
 
 # Rodar container
 docker-compose up --build
@@ -67,7 +67,7 @@ docker-compose up --build
 git clone https://github.com/gmgpx/vitafor_crud_test.git
 
 # Entre no projeto
-cd rick-and-morty
+cd vitafor_crud_test/rick-and-morty
 
 # Instale dependências do Laravel
 composer install
@@ -81,7 +81,7 @@ npm install
 # Compile os assets
 npm run dev
 
-# Inicie o servidor Laravel
+# Em outro terminal inicie o servidor Laravel
 php artisan serve
 ```
 
@@ -141,7 +141,7 @@ To run locally (without Docker):
 git clone https://github.com/gmgpx/vitafor_crud_test.git
 
 # Enter the project folder
-cd rick-and-morty
+cd vitafor_crud_test/rick-and-morty
 
 # Run container
 docker-compose up --build
@@ -168,7 +168,7 @@ npm install
 # Compile assets
 npm run dev
 
-# Start Laravel server
+# Open another terminal and start the Laravel server
 php artisan serve
 ```
 
