@@ -141,7 +141,9 @@ class CharacterController extends Controller
             ->first();
 
         if ($exists) {
-            $exists->update($request->only(['species', 'image', 'url']));
+            $exists->fill($request->only(['species', 'image', 'url']));
+            $exists->updated_at = now();
+            $exists->save();
             return redirect()->route('characters.index')->with('success', 'Personagem atualizado!');
         }
 
@@ -156,7 +158,7 @@ class CharacterController extends Controller
         return redirect()->route('characters.index')->with('success', 'Personagem salvo!');
     }
 
-    // Mostra detalhes do personagem, da API ou DB
+    // Mostra detalhes do personagem, vindo da API ou DB
     public function show($id)
     {
         $character = null;
@@ -207,7 +209,10 @@ class CharacterController extends Controller
     {
         $character = Character::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 
-        $character->update($request->only(['name', 'species', 'image', 'url']));
+        $character->update(array_merge(
+            $request->only(['name', 'species', 'image', 'url']),
+            ['updated_at' => now()]
+        ));
 
         return redirect()->route('characters.index')->with('success', 'Personagem atualizado com sucesso!');
     }
